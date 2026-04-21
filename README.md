@@ -1,6 +1,6 @@
 # 🌩️ Nimbus — Previsão do Tempo Neon
 
-Uma landing page **moderna, dark mode com estética neon**, para consultar a previsão do tempo de qualquer lugar do Brasil (e do mundo) por **cidade** ou **CEP da rua**.
+Uma landing page **moderna, dark mode com estética neon**, para consultar a previsão do tempo de qualquer lugar do mundo por **cidade**.
 
 > Construído com React + Vite + TypeScript + Tailwind, usando APIs públicas e gratuitas (sem necessidade de chave de API).
 
@@ -26,7 +26,7 @@ Uma landing page **moderna, dark mode com estética neon**, para consultar a pre
 ## 🚀 Demonstração
 
 - **Hero** com headline grande, texto com gradiente neon e busca centralizada.
-- **Toggle Cidade / CEP** para alternar o modo de busca.
+- **Busca por cidade** — simples e direta, sem complicações.
 - **Card principal** com temperatura atual, sensação térmica, umidade e vento.
 - **Lista horária** (próximas 24h) com scroll horizontal.
 - **Previsão de 7 dias** com ícone, descrição, probabilidade de chuva e mín/máx.
@@ -37,7 +37,6 @@ Uma landing page **moderna, dark mode com estética neon**, para consultar a pre
 ## ✨ Funcionalidades
 
 - 🔍 **Busca por cidade** (qualquer lugar do mundo, em português).
-- 📮 **Busca por CEP brasileiro** (8 dígitos, com ou sem hífen) — converte CEP em endereço usando ViaCEP e geocoda para latitude/longitude.
 - 🌡️ **Clima atual**: temperatura, sensação térmica, umidade, vento e descrição amigável (com emoji).
 - ⏰ **Previsão horária** das próximas 24 horas.
 - 📅 **Previsão diária** dos próximos 7 dias com probabilidade de chuva.
@@ -76,10 +75,6 @@ Todas **gratuitas e sem necessidade de cadastro / API key**:
    `https://geocoding-api.open-meteo.com/v1/search`
    Converte nome de cidade em coordenadas geográficas.
 
-3. **[ViaCEP](https://viacep.com.br/)**
-   `https://viacep.com.br/ws/{CEP}/json/`
-   Converte CEP brasileiro em endereço (logradouro, bairro, cidade, UF). O endereço é então geocodificado pela Open-Meteo para obter coordenadas.
-
 ---
 
 ## 🗂️ Arquitetura do Projeto
@@ -87,12 +82,12 @@ Todas **gratuitas e sem necessidade de cadastro / API key**:
 ```
 src/
 ├── components/
-│   ├── SearchBar.tsx       # Barra de busca com toggle Cidade/CEP
+│   ├── SearchBar.tsx       # Barra de busca simplificada (apenas cidade)
 │   ├── WeatherDisplay.tsx  # Card atual + horária + 7 dias
 │   └── ui/                 # Componentes shadcn (button, toast, etc.)
 ├── lib/
 │   ├── utils.ts            # cn() helper
-│   └── weather.ts          # Lógica de API: ViaCEP, geocoding, Open-Meteo
+│   └── weather.ts          # Lógica de API: geocoding, Open-Meteo
 ├── pages/
 │   ├── Index.tsx           # Landing page principal
 │   └── NotFound.tsx
@@ -107,19 +102,15 @@ tailwind.config.ts          # Tokens estendidos (cores, fontes, sombras, gradien
 ### Fluxo de uma consulta
 
 ```
-Usuário digita
-   │
-   ├─ Modo "Cidade" ──► geocodeCity()  ──► { lat, lon }
-   │
-   └─ Modo "CEP"    ──► lookupCep()
-                          ├─ ViaCEP  → { logradouro, cidade, UF }
-                          └─ geocodeCity("cidade, UF, Brasil") → { lat, lon }
-                                  │
-                                  ▼
-                         fetchWeather(lat, lon)   (Open-Meteo)
-                                  │
-                                  ▼
-                          WeatherDisplay renderiza
+Usuário digita cidade
+    │
+    └─► geocodeCity(query)  ──► { lat, lon }
+            │
+            ▼
+    fetchWeather(lat, lon)   (Open-Meteo)
+            │
+            ▼
+    WeatherDisplay renderiza
 ```
 
 ---
@@ -172,10 +163,10 @@ Toda a estética está centralizada em `src/index.css` e `tailwind.config.ts`.
 Documentação cronológica de como o projeto foi construído.
 
 ### 1. Levantamento de requisitos
-O usuário pediu uma **landing page moderna de previsão do tempo** com a opção de buscar por **CEP da rua** ou **cidade**. Foram feitas três perguntas de clarificação:
+O usuário pediu uma **landing page moderna de previsão do tempo** com busca por cidade. Foram feitas perguntas de clarificação:
 - **API**: Open-Meteo (grátis, sem chave). ✅
 - **Visual**: Dark mode com neon. ✅
-- **CEP**: Cidade + CEP brasileiro. ✅
+- **Funcionalidade**: Apenas busca por cidade (CEP removido posteriormente). ✅
 
 ### 2. Design System primeiro
 Antes de escrever qualquer componente, o `src/index.css` e o `tailwind.config.ts` foram reescritos:
@@ -193,20 +184,19 @@ Antes de escrever qualquer componente, o `src/index.css` e o `tailwind.config.ts
 
 ### 4. Camada de dados (`src/lib/weather.ts`)
 Funções puras, isoladas da UI:
-- `isCep(v)` / `sanitizeCep(v)` — validação.
-- `lookupCep(cep)` — chama ViaCEP, depois geocoda a cidade resultante.
 - `geocodeCity(query)` — chama a Open-Meteo Geocoding API.
 - `fetchWeather(lat, lon)` — chama a Open-Meteo Forecast com `current`, `hourly`, `daily`.
 - `describeWeather(code)` — mapeia o `weather_code` da WMO em label PT-BR + emoji.
 - `formatDay()` / `formatHour()` — formatação localizada.
 
+> **Nota**: Funcionalidade de busca por CEP foi removida na versão atual para simplificar a experiência.
+
 ### 5. Componentes de UI
 
 **`SearchBar.tsx`**
-- Toggle pill com dois modos (Cidade / CEP), gradiente neon no item ativo.
 - Input arredondado em glass + borda neon, ícone de lupa, botão "Consultar" embutido.
 - Estado de `loading` com spinner (lucide `Loader2`).
-- `inputMode="numeric"` quando o modo é CEP.
+- Interface simplificada — apenas busca por cidade.
 
 **`WeatherDisplay.tsx`**
 - **Card atual**: orbes desfocadas animadas no fundo, temperatura gigante com gradiente, emoji do clima flutuando, 3 stats (umidade, vento, sensação).
@@ -222,8 +212,6 @@ Funções puras, isoladas da UI:
 - Footer minimalista com créditos.
 
 ### 7. Validação e tratamento de erros
-- CEP é validado antes do fetch (mensagem clara se inválido).
-- ViaCEP retorna `erro: true` quando não encontra → mensagem "CEP não encontrado".
 - Open-Meteo Geocoding sem resultados → "Cidade não encontrada".
 - Qualquer falha de rede mostra um toast amigável.
 
@@ -292,7 +280,6 @@ Ideias para próximas iterações:
 ## 🙏 Créditos
 
 - Dados meteorológicos: **[Open-Meteo](https://open-meteo.com/)**
-- CEPs brasileiros: **[ViaCEP](https://viacep.com.br/)**
 - Componentes UI: **[shadcn/ui](https://ui.shadcn.com/)**
 - Ícones: **[Lucide](https://lucide.dev/)**
 - Fontes: **[Space Grotesk](https://fonts.google.com/specimen/Space+Grotesk)** + **[Inter](https://fonts.google.com/specimen/Inter)**
