@@ -1,20 +1,6 @@
-// Weather utilities — Open-Meteo (no API key) + ViaCEP for Brazilian CEPs
+// Weather utilities — Open-Meteo (no API key)
 
 export type Coords = { lat: number; lon: number; name: string; admin?: string; country?: string };
-
-const sanitizeCep = (v: string) => v.replace(/\D/g, "");
-export const isCep = (v: string) => sanitizeCep(v).length === 8;
-
-export async function lookupCep(cep: string): Promise<Coords> {
-  const clean = sanitizeCep(cep);
-  const res = await fetch(`https://viacep.com.br/ws/${clean}/json/`);
-  if (!res.ok) throw new Error("CEP não encontrado");
-  const data = await res.json();
-  if (data.erro) throw new Error("CEP não encontrado");
-  const query = `${data.localidade}, ${data.uf}, Brasil`;
-  const geo = await geocodeCity(query);
-  return { ...geo, name: `${data.logradouro || data.bairro || data.localidade}, ${data.localidade} - ${data.uf}` };
-}
 
 export async function geocodeCity(query: string): Promise<Coords> {
   const url = `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(query)}&count=1&language=pt&format=json`;

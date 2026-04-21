@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
-import { SearchBar, SearchMode } from "@/components/SearchBar";
+import { SearchBar } from "@/components/SearchBar";
 import { WeatherDisplay } from "@/components/WeatherDisplay";
-import { Coords, WeatherData, fetchWeather, geocodeCity, lookupCep, isCep } from "@/lib/weather";
+import { Coords, WeatherData, fetchWeather, geocodeCity } from "@/lib/weather";
 import { toast } from "sonner";
 import { Cloud, Sparkles, Zap } from "lucide-react";
 
@@ -10,14 +10,10 @@ const Index = () => {
   const [location, setLocation] = useState<Coords | null>(null);
   const [data, setData] = useState<WeatherData | null>(null);
 
-  const runSearch = async (mode: SearchMode, value: string) => {
+  const runSearch = async (value: string) => {
     setLoading(true);
     try {
-      if (mode === "cep" && !isCep(value)) {
-        toast.error("CEP inválido. Use 8 dígitos (ex: 01310-100).");
-        return;
-      }
-      const loc = mode === "cep" ? await lookupCep(value) : await geocodeCity(value);
+      const loc = await geocodeCity(value);
       const weather = await fetchWeather(loc.lat, loc.lon);
       setLocation(loc);
       setData(weather);
@@ -30,7 +26,7 @@ const Index = () => {
 
   // Default city on first visit
   useEffect(() => {
-    runSearch("city", "São Paulo");
+    runSearch("São Paulo");
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -56,7 +52,7 @@ const Index = () => {
       <section className="relative z-10 container pt-10 pb-6 text-center">
         <div className="inline-flex items-center gap-2 glass rounded-full px-4 py-1.5 text-xs text-muted-foreground mb-6 animate-fade-up">
           <span className="w-2 h-2 rounded-full bg-primary animate-pulse-glow" />
-          Previsão precisa para qualquer lugar do Brasil
+          Previsão precisa para qualquer lugar do mundo
         </div>
         <h1 className="font-display text-5xl md:text-7xl font-bold leading-[1.05] tracking-tight animate-fade-up">
           Previsão do tempo
@@ -64,7 +60,7 @@ const Index = () => {
           <span className="neon-text">no seu pulso.</span>
         </h1>
         <p className="mt-5 text-base md:text-lg text-muted-foreground max-w-xl mx-auto animate-fade-up">
-          Consulte o clima de qualquer cidade ou diretamente pelo CEP da sua rua.
+          Consulte o clima de qualquer cidade ao redor do mundo.
           Dados atualizados, visual neon, zero fricção.
         </p>
 
@@ -80,7 +76,7 @@ const Index = () => {
       )}
 
       <footer className="relative z-10 container py-8 text-center text-xs text-muted-foreground">
-        Construído com Open-Meteo · ViaCEP · Lovable
+        Construído com Open-Meteo · Lovable
       </footer>
     </main>
   );
