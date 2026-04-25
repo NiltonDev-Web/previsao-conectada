@@ -76,7 +76,7 @@ const Index = () => {
       )}
 
       <footer className="relative z-10 container py-8 text-center text-xs text-muted-foreground">
-        Construído com Open-Meteo · Lovable
+        Desenvolvido por NS Soluções em TI
       </footer>
     </main>
   );
