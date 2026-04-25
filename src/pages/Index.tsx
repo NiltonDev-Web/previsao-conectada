@@ -41,7 +41,7 @@ const Index = () => {
             <Sparkles className="w-3 h-3 text-accent absolute -top-1 -right-1 animate-pulse-glow" />
           </span>
           <span className="font-display text-xl font-bold tracking-tight">
-            Nimbus<span className="text-primary">.</span>
+            NS Soluções em TI<span className="text-primary">.</span>
           </span>
         </a>
         <span className="hidden sm:inline-flex items-center gap-1.5 text-xs text-muted-foreground glass px-3 py-1.5 rounded-full">
